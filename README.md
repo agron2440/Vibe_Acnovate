@@ -1,75 +1,38 @@
-# React + TypeScript + Vite
+# Chart Generator & Editor Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A REACT utility application that connects to VibeIQ using the Contrail Extensions SDK and generates a chart using the [Recharts](https://recharts.github.io/) library.
+The utility allows users to enter data and select pre-defined chart types to generate the chart and add it to the showcase frame currently being viewed.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Supported Chart Types and Variants
 
-## React Compiler
+| Chart Types | Variants |
+| ----------- | -------- |
+| Bar Chart | Grouped, Stacked, 100% Stacked, Horizontal |
+| Line Chart | Smooth, Linear, Step |
+| Area Chart | Overlapping, Stacked, 100% Stacked, Step |
+| Pie Chart | Pie, Donut, Half Circle |
+| Scatter Chart | Points, Bubble |
+| Radar Chart | Filled, Outline, With dots |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Add Series & Rows
 
-## Expanding the ESLint configuration
+The chart data editor comes with a grid interface allowing users to add as many series and rows on demand to make charts with same details like a powerpoint application.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Customize Colors for Series/Rows
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Depending on the chart type, you can customize the color for each of the series/rows depending on chart type to get a chart which matches your theeme. The charts are later added to the VibeIQ as a PNG image with a transparent background so that it takes the frame's theme where it has been added.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## How to Test/Debug
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Clone the git repository into your local system which must contain Node.js installation.
+2. Open command shell on project root and execute the command ```npm install``` to install all dependencies.
+3. Execute ```npm run dev``` on the same folder as above command to start the server locally.
+4. Open http://localhost:5173 to navigate to the app which should load the application with a loading spinner due to missing connection to VibeIQ application.
+5. Open VibeIQ's Showcase app and open a showcase content frame where you want to do the testing.
+6. Press ```Ctrl + Shift + D``` to enable the Developer's Mode in VibeIQ.
+7. Click on the Magic Wand icon and look for "Local Extension" menu under it.
+8. Select the "Local Extension" and in the pop up window, insert the local host URL of step (4).
+9. App can now be locally tested/debugged.
 
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
