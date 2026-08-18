@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { ChartType, ColumnDef, DataRow } from '../types/chart';
 import { COLORS } from '../data/chartConfigs';
+import { parseAccountingNumber } from '../utils/numberParsing';
 import ColorPicker from './ColorPicker';
 
 interface Props {
@@ -55,7 +56,7 @@ export default function ChartDataEditor({
     const updated = [...data];
     updated[rowIdx] = {
       ...updated[rowIdx],
-      [key]: colType === 'number' ? (parseFloat(rawValue) || 0) : rawValue,
+      [key]: colType === 'number' ? parseAccountingNumber(rawValue) : rawValue,
     };
     onChange(updated);
   };
@@ -96,7 +97,7 @@ export default function ChartDataEditor({
       rowValues.forEach((value, c) => {
         const col = pasteableCols[startColIdx + c];
         if (!col) return;
-        row[col.key] = col.type === 'number' ? (parseFloat(value) || 0) : value;
+        row[col.key] = col.type === 'number' ? parseAccountingNumber(value) : value;
       });
       updated[targetRowIdx] = row;
     });
