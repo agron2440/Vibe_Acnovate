@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import type { ChartType, ColumnDef, DataRow } from '../types/chart';
-import { COLORS } from '../data/chartConfigs';
+import type { AxisColors, AxisLabels, ChartType, ColumnDef, DataRow } from '../types/chart';
+import { COLORS, defaultAxisLabels } from '../data/chartConfigs';
 import { parseAccountingNumber } from '../utils/numberParsing';
 import ColorPicker from './ColorPicker';
 
@@ -10,10 +10,22 @@ interface Props {
   columns: ColumnDef[];
   onChange: (data: DataRow[]) => void;
   onColumnsChange: (cols: ColumnDef[]) => void;
+  axisColors: AxisColors;
+  onAxisColorsChange: (colors: AxisColors) => void;
+  axisLabels: AxisLabels;
+  onAxisLabelsChange: (labels: AxisLabels) => void;
 }
 
 const SERIES_ADDABLE: ChartType[] = ['bar', 'line', 'area', 'radar'];
 const SERIES_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+// chart types that render an XAxis / YAxis / CartesianGrid in the preview
+const AXIS_STYLABLE: ChartType[] = ['bar', 'line', 'area', 'scatter'];
+// axis fields shown in the Axes toolbar — xAxis/yAxis are renamable, grid is color-only
+const AXIS_FIELDS: Array<{ key: keyof AxisColors; defaultLabel: string; renamable: boolean }> = [
+  { key: 'xAxis', defaultLabel: 'X-Axis', renamable: true },
+  { key: 'yAxis', defaultLabel: 'Y-Axis', renamable: true },
+  { key: 'grid', defaultLabel: 'Grid', renamable: false },
+];
 
 export default function ChartDataEditor({
   chartType,
@@ -21,12 +33,20 @@ export default function ChartDataEditor({
   columns,
   onChange,
   onColumnsChange,
+  axisColors,
+  onAxisColorsChange,
+  axisLabels,
+  onAxisLabelsChange,
 }: Props) {
   const [editingColKey, setEditingColKey] = useState<string | null>(null);
   // header-level series color picker
   const [colorPickerKey, setColorPickerKey] = useState<string | null>(null);
   // row-level slice color picker — key format: "{rowIdx}:{colKey}"
   const [cellPickerKey, setCellPickerKey] = useState<string | null>(null);
+  // axis/grid color picker — key is the AxisColors field being edited
+  const [axisPickerKey, setAxisPickerKey] = useState<keyof AxisColors | null>(null);
+  // axis label being renamed inline — key is the AxisLabels field being edited
+  const [editingAxisLabelKey, setEditingAxisLabelKey] = useState<keyof AxisLabels | null>(null);
 
   useEffect(() => {
     if (!colorPickerKey) return;
@@ -41,6 +61,21 @@ export default function ChartDataEditor({
     document.addEventListener('click', close);
     return () => document.removeEventListener('click', close);
   }, [cellPickerKey]);
+
+  useEffect(() => {
+    if (!axisPickerKey) return;
+    const close = () => setAxisPickerKey(null);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [axisPickerKey]);
+
+  useEffect(() => {
+    if (!editingAxisLabelKey) return;
+    const close = () => handleAxisLabelBlur(editingAxisLabelKey);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingAxisLabelKey]);
 
   const seriesColumns = columns.filter((c) => c.isSeries);
   const canAddSeries = SERIES_ADDABLE.includes(chartType) && seriesColumns.length < 6;
@@ -139,6 +174,15 @@ export default function ChartDataEditor({
       onColumnsChange(columns.map((c) => (c.key === key ? { ...c, label: c.key } : c)));
     }
     setEditingColKey(null);
+  };
+
+  // ── axis label editing ────────────────────────────────────────────────────
+
+  const handleAxisLabelBlur = (key: keyof AxisLabels) => {
+    if (!axisLabels[key].trim()) {
+      onAxisLabelsChange({ ...axisLabels, [key]: defaultAxisLabels[key] });
+    }
+    setEditingAxisLabelKey(null);
   };
 
   // ── series color operations ───────────────────────────────────────────────
@@ -355,6 +399,77 @@ export default function ChartDataEditor({
           </tbody>
         </table>
       </div>
+
+      {AXIS_STYLABLE.includes(chartType) && (
+        <div className="px-4 py-3 border-t border-gray-200 shrink-0 flex items-center gap-4">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Axes
+          </span>
+          {AXIS_FIELDS.map((field) => (
+            <div key={field.key} className="relative flex items-center gap-1.5 group/axis min-w-0">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAxisPickerKey(axisPickerKey === field.key ? null : field.key);
+                }}
+                title={`Change ${field.defaultLabel.toLowerCase()} color`}
+                className="w-4 h-4 rounded-full ring-1 ring-gray-200 ring-offset-1 hover:ring-2 hover:ring-indigo-300 transition-all focus:outline-none shrink-0"
+                style={{ backgroundColor: axisColors[field.key] }}
+              />
+              {axisPickerKey === field.key && (
+                <div
+                  className="absolute bottom-full left-0 mb-2 z-30"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ColorPicker
+                    color={axisColors[field.key]}
+                    label={`${field.defaultLabel} color`}
+                    onChange={(hex) =>
+                      onAxisColorsChange({ ...axisColors, [field.key]: hex })
+                    }
+                    onClose={() => setAxisPickerKey(null)}
+                  />
+                </div>
+              )}
+
+              {field.renamable ? (
+                editingAxisLabelKey === field.key ? (
+                  <input
+                    type="text"
+                    autoFocus
+                    value={axisLabels[field.key as keyof AxisLabels]}
+                    onChange={(e) =>
+                      onAxisLabelsChange({ ...axisLabels, [field.key]: e.target.value })
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                    onBlur={() => handleAxisLabelBlur(field.key as keyof AxisLabels)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === 'Escape') {
+                        handleAxisLabelBlur(field.key as keyof AxisLabels);
+                      }
+                      e.stopPropagation();
+                    }}
+                    className="w-24 px-1.5 py-0.5 text-xs bg-white border border-indigo-400 rounded focus:outline-none"
+                  />
+                ) : (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingAxisLabelKey(field.key as keyof AxisLabels);
+                    }}
+                    title="Click to rename"
+                    className="text-xs text-gray-500 truncate cursor-text hover:text-indigo-600 select-none"
+                  >
+                    {axisLabels[field.key as keyof AxisLabels]}
+                  </span>
+                )
+              ) : (
+                <span className="text-xs text-gray-500">{field.defaultLabel}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="px-4 py-3 border-t border-gray-200 shrink-0 flex items-center gap-3">
         <button

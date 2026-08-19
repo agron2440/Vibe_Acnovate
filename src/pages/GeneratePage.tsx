@@ -2,6 +2,8 @@ import ChartTypeSelector from "../components/ChartTypeSelector";
 import ChartDataEditor from "../components/ChartDataEditor";
 import ChartPreview from "../components/ChartPreview";
 import type {
+  AxisColors,
+  AxisLabels,
   ChartType,
   ChartVariants,
   ColumnDef,
@@ -10,6 +12,8 @@ import type {
 } from "../types/chart";
 import {
   chartConfigs,
+  defaultAxisColors,
+  defaultAxisLabels,
   defaultVariants,
   variantOptions,
 } from "../data/chartConfigs";
@@ -43,6 +47,16 @@ export default function GeneratePage() {
       ? { ...defaultVariants, ...existingChartConfig.variants }
       : defaultVariants,
   );
+  const [axisColors, setAxisColors] = useState<AxisColors>(
+    existingChartConfig
+      ? { ...defaultAxisColors, ...existingChartConfig.axisColors }
+      : defaultAxisColors,
+  );
+  const [axisLabels, setAxisLabels] = useState<AxisLabels>(
+    existingChartConfig
+      ? { ...defaultAxisLabels, ...existingChartConfig.axisLabels }
+      : defaultAxisLabels,
+  );
   const [isExporting, setIsExporting] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +77,8 @@ export default function GeneratePage() {
           variants,
           data: chartData,
           elementId: existingChartConfig?.elementId,
+          axisColors,
+          axisLabels,
         },
       });
     } finally {
@@ -76,6 +92,8 @@ export default function GeneratePage() {
     setChartData(chartConfigs[type].defaultData);
     setChartColumns([...chartConfigs[type].columns]);
     setVariants(defaultVariants);
+    setAxisColors(defaultAxisColors);
+    setAxisLabels(defaultAxisLabels);
     setStep("edit");
   };
 
@@ -194,6 +212,10 @@ export default function GeneratePage() {
                 columns={chartColumns}
                 onChange={setChartData}
                 onColumnsChange={setChartColumns}
+                axisColors={axisColors}
+                onAxisColorsChange={setAxisColors}
+                axisLabels={axisLabels}
+                onAxisLabelsChange={setAxisLabels}
               />
             </div>
 
@@ -203,6 +225,8 @@ export default function GeneratePage() {
                 data={chartData}
                 columns={chartColumns}
                 variants={variants}
+                axisColors={axisColors}
+                axisLabels={axisLabels}
                 containerRef={chartContainerRef}
               />
             </div>
