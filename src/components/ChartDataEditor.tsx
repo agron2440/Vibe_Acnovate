@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { AxisColors, AxisLabels, ChartType, ColumnDef, DataRow } from '../types/chart';
-import { COLORS, defaultAxisLabels } from '../data/chartConfigs';
+import { COLORS } from '../data/chartConfigs';
 import { parseAccountingNumber } from '../utils/numberParsing';
 import ColorPicker from './ColorPicker';
 
@@ -180,7 +180,7 @@ export default function ChartDataEditor({
 
   const handleAxisLabelBlur = (key: keyof AxisLabels) => {
     if (!axisLabels[key].trim()) {
-      onAxisLabelsChange({ ...axisLabels, [key]: defaultAxisLabels[key] });
+      onAxisLabelsChange({ ...axisLabels, [key]: '' });
     }
     setEditingAxisLabelKey(null);
   };
@@ -457,10 +457,14 @@ export default function ChartDataEditor({
                       e.stopPropagation();
                       setEditingAxisLabelKey(field.key as keyof AxisLabels);
                     }}
-                    title="Click to rename"
-                    className="text-xs text-gray-500 truncate cursor-text hover:text-indigo-600 select-none"
+                    title="Click to set label"
+                    className={`text-xs truncate cursor-text select-none ${
+                      axisLabels[field.key as keyof AxisLabels]
+                        ? 'text-gray-500 hover:text-indigo-600'
+                        : 'text-gray-300 italic hover:text-indigo-400'
+                    }`}
                   >
-                    {axisLabels[field.key as keyof AxisLabels]}
+                    {axisLabels[field.key as keyof AxisLabels] || `${field.defaultLabel} Label`}
                   </span>
                 )
               ) : (

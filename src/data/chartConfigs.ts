@@ -9,8 +9,8 @@ export const defaultAxisColors: AxisColors = {
 };
 
 export const defaultAxisLabels: AxisLabels = {
-  xAxis: 'X-Axis',
-  yAxis: 'Y-Axis',
+  xAxis: '',
+  yAxis: '',
 };
 
 export const chartConfigs: Record<ChartType, ChartConfig> = {

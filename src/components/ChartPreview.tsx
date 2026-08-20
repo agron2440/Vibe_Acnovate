@@ -121,7 +121,7 @@ function renderChart(
               label={yAxisLabel}
             />
             <Tooltip />
-            <Legend />
+            <Legend wrapperStyle={{ paddingTop: '10px' }} />
             {seriesCols.map((col, i) => (
               <Bar key={col.key} dataKey={col.key} name={col.label} fill={col.color ?? COLORS[i % COLORS.length]} />
             ))}
@@ -140,7 +140,7 @@ function renderChart(
             label={yAxisLabel}
           />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
           {seriesCols.map((col, i) => (
             <Bar
               key={col.key}
@@ -166,7 +166,7 @@ function renderChart(
           <XAxis dataKey={categoryKey} tick={{ fontSize: 11, fill: axisColors.xAxis }} stroke={axisColors.xAxis} label={xAxisLabel} />
           <YAxis tick={{ fontSize: 11, fill: axisColors.yAxis }} stroke={axisColors.yAxis} label={yAxisLabel} />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
           {seriesCols.map((col, i) => (
             <Line
               key={col.key}
@@ -201,7 +201,7 @@ function renderChart(
             label={yAxisLabel}
           />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
           {seriesCols.map((col, i) => (
             <Area
               key={col.key}
@@ -251,7 +251,7 @@ function renderChart(
             labelLine
           />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
         </PieChart>
       );
     }
@@ -298,7 +298,7 @@ function renderChart(
             );
           })}
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
         </RadarChart>
       );
     }
