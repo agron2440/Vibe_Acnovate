@@ -1,6 +1,17 @@
-import type { ChartConfig, ChartType, ChartVariants } from '../types/chart';
+import type { AxisColors, AxisLabels, ChartConfig, ChartType, ChartVariants } from '../types/chart';
 
 export const COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+export const defaultAxisColors: AxisColors = {
+  xAxis: '#666666',
+  yAxis: '#666666',
+  grid: '#f0f0f0',
+};
+
+export const defaultAxisLabels: AxisLabels = {
+  xAxis: '',
+  yAxis: '',
+};
 
 export const chartConfigs: Record<ChartType, ChartConfig> = {
   bar: {

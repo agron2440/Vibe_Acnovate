@@ -27,9 +27,10 @@ interface Props {
   color: string;
   onChange: (hex: string) => void;
   onClose: () => void;
+  label?: string;
 }
 
-export default function ColorPicker({ color, onChange, onClose }: Props) {
+export default function ColorPicker({ color, onChange, onClose, label = 'Series color' }: Props) {
   const [hex, setHex] = useState(color.toLowerCase());
   const [rgb, setRgb] = useState<{ r: number; g: number; b: number }>(
     () => hexToRgb(color) ?? { r: 99, g: 102, b: 241 },
@@ -59,7 +60,7 @@ export default function ColorPicker({ color, onChange, onClose }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-3 w-56">
       <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2">
-        Series color
+        {label}
       </p>
 
       {/* Swatches */}

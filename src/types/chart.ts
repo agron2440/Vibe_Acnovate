@@ -16,6 +16,17 @@ export interface ChartVariants {
   radar:   RadarVariant;
 }
 
+export interface AxisColors {
+  xAxis: string;
+  yAxis: string;
+  grid: string;
+}
+
+export interface AxisLabels {
+  xAxis: string;
+  yAxis: string;
+}
+
 export interface DataRow {
   [key: string]: string | number;
 }
@@ -44,4 +55,6 @@ export interface SavedChartConfig {
   variants: ChartVariants;
   data: DataRow[];
   elementId?: string;
+  axisColors?: AxisColors;
+  axisLabels?: AxisLabels;
 }

@@ -23,18 +23,28 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { ChartType, ChartVariants, ColumnDef, DataRow } from '../types/chart';
-import { chartConfigs, COLORS } from '../data/chartConfigs';
+import type { AxisColors, AxisLabels, ChartType, ChartVariants, ColumnDef, DataRow } from '../types/chart';
+import { chartConfigs, COLORS, defaultAxisColors, defaultAxisLabels } from '../data/chartConfigs';
 
 interface Props {
   chartType: ChartType;
   data: DataRow[];
   columns: ColumnDef[];
   variants: ChartVariants;
+  axisColors?: AxisColors;
+  axisLabels?: AxisLabels;
   containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export default function ChartPreview({ chartType, data, columns, variants, containerRef }: Props) {
+export default function ChartPreview({
+  chartType,
+  data,
+  columns,
+  variants,
+  axisColors = defaultAxisColors,
+  axisLabels = defaultAxisLabels,
+  containerRef,
+}: Props) {
   return (
     <div className="flex flex-col h-full p-4">
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4 shrink-0">
@@ -47,7 +57,7 @@ export default function ChartPreview({ chartType, data, columns, variants, conta
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            {renderChart(chartType, data, columns, variants)}
+            {renderChart(chartType, data, columns, variants, axisColors, axisLabels)}
           </ResponsiveContainer>
         )}
       </div>
@@ -71,10 +81,23 @@ function renderChart(
   data: DataRow[],
   columns: ColumnDef[],
   variants: ChartVariants,
+  axisColors: AxisColors,
+  axisLabels: AxisLabels,
 ) {
   const seriesCols   = columns.filter((c) => c.isSeries);
   const categoryKey  = columns.find((c) => c.type === 'text')?.key ?? chartConfigs[chartType].categoryKey;
-  const margin       = { top: 10, right: 24, left: 0, bottom: 5 };
+  const margin       = {
+    top: 10,
+    right: 24,
+    left: axisLabels.yAxis ? 20 : 0,
+    bottom: axisLabels.xAxis ? 20 : 5,
+  };
+  const xAxisLabel = axisLabels.xAxis
+    ? { value: axisLabels.xAxis, position: 'insideBottom' as const, offset: -10, style: { fill: axisColors.xAxis, fontSize: 12 } }
+    : undefined;
+  const yAxisLabel = axisLabels.yAxis
+    ? { value: axisLabels.yAxis, angle: -90, position: 'insideLeft' as const, style: { fill: axisColors.yAxis, fontSize: 12 }, offset: 10 }
+    : undefined;
 
   switch (chartType) {
     // ── Bar ──────────────────────────────────────────────────────────────────
@@ -86,12 +109,19 @@ function renderChart(
 
       if (isHorizontal) {
         return (
-          <BarChart layout="vertical" data={chartData} margin={{ ...margin, left: 16 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis type="number" tick={{ fontSize: 11 }} />
-            <YAxis dataKey={categoryKey} type="category" width={70} tick={{ fontSize: 11 }} />
+          <BarChart layout="vertical" data={chartData} margin={{ ...margin, left: axisLabels.yAxis ? 36 : 16 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={axisColors.grid} />
+            <XAxis type="number" tick={{ fontSize: 11, fill: axisColors.xAxis }} stroke={axisColors.xAxis} label={xAxisLabel} />
+            <YAxis
+              dataKey={categoryKey}
+              type="category"
+              width={70}
+              tick={{ fontSize: 11, fill: axisColors.yAxis }}
+              stroke={axisColors.yAxis}
+              label={yAxisLabel}
+            />
             <Tooltip />
-            <Legend />
+            <Legend wrapperStyle={{ paddingTop: '10px' }} />
             {seriesCols.map((col, i) => (
               <Bar key={col.key} dataKey={col.key} name={col.label} fill={col.color ?? COLORS[i % COLORS.length]} />
             ))}
@@ -101,14 +131,16 @@ function renderChart(
 
       return (
         <BarChart data={chartData} margin={margin}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey={categoryKey} tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke={axisColors.grid} />
+          <XAxis dataKey={categoryKey} tick={{ fontSize: 11, fill: axisColors.xAxis }} stroke={axisColors.xAxis} label={xAxisLabel} />
           <YAxis
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 11, fill: axisColors.yAxis }}
+            stroke={axisColors.yAxis}
             tickFormatter={v === 'stacked100' ? (val) => `${val}%` : undefined}
+            label={yAxisLabel}
           />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
           {seriesCols.map((col, i) => (
             <Bar
               key={col.key}
@@ -130,11 +162,11 @@ function renderChart(
 
       return (
         <LineChart data={data} margin={margin}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey={categoryKey} tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke={axisColors.grid} />
+          <XAxis dataKey={categoryKey} tick={{ fontSize: 11, fill: axisColors.xAxis }} stroke={axisColors.xAxis} label={xAxisLabel} />
+          <YAxis tick={{ fontSize: 11, fill: axisColors.yAxis }} stroke={axisColors.yAxis} label={yAxisLabel} />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
           {seriesCols.map((col, i) => (
             <Line
               key={col.key}
@@ -160,14 +192,16 @@ function renderChart(
 
       return (
         <AreaChart data={chartData} margin={margin}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey={categoryKey} tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke={axisColors.grid} />
+          <XAxis dataKey={categoryKey} tick={{ fontSize: 11, fill: axisColors.xAxis }} stroke={axisColors.xAxis} label={xAxisLabel} />
           <YAxis
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 11, fill: axisColors.yAxis }}
+            stroke={axisColors.yAxis}
             tickFormatter={v === 'stacked100' ? (val) => `${val}%` : undefined}
+            label={yAxisLabel}
           />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
           {seriesCols.map((col, i) => (
             <Area
               key={col.key}
@@ -217,7 +251,7 @@ function renderChart(
             labelLine
           />
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
         </PieChart>
       );
     }
@@ -228,9 +262,9 @@ function renderChart(
 
       return (
         <ScatterChart margin={margin}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey="x" type="number" name="X" tick={{ fontSize: 11 }} />
-          <YAxis dataKey="y" type="number" name="Y" tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke={axisColors.grid} />
+          <XAxis dataKey="x" type="number" name="X" tick={{ fontSize: 11, fill: axisColors.xAxis }} stroke={axisColors.xAxis} label={xAxisLabel} />
+          <YAxis dataKey="y" type="number" name="Y" tick={{ fontSize: 11, fill: axisColors.yAxis }} stroke={axisColors.yAxis} label={yAxisLabel} />
           {v === 'bubble' && <ZAxis dataKey="size" range={[40, 500]} name="Size" />}
           <Tooltip cursor={{ strokeDasharray: '3 3' }} />
           <Scatter name={categoryKey} data={data} fill={COLORS[0]} />
@@ -264,7 +298,7 @@ function renderChart(
             );
           })}
           <Tooltip />
-          <Legend />
+          <Legend wrapperStyle={{ paddingTop: '10px' }} />
         </RadarChart>
       );
     }
